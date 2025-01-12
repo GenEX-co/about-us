@@ -54,6 +54,7 @@
       object-fit: fill; /* アスペクト比を無視して表示領域を全部埋める */
       width: 100%; /* 100%幅で表示 */
       height: 100%;
+      display: none; /* 初期状態では非表示にする */
     }
 
     /* 文字の配置を指定するクラス */
@@ -124,11 +125,11 @@
       const container = document.createElement('div');
       container.classList.add('full-screen', 'relative');
 
-      // 動画ファイルを3つの異なるソースで設定
+      // 動画ファイルを`center`, `left`, `right` の順番に設定
       const videoFiles = [
-        './low/left.mp4', // 最初の動画
-        './low/center.mp4',       // 2番目の動画
-        './low/right.mp4'        // 3番目の動画
+        './low/center.mp4', // 1番目の動画（center）
+        './low/left.mp4',       // 2番目の動画（left）
+        './low/right.mp4'        // 3番目の動画（right）
       ];
 
       let currentVideo = 0;
@@ -145,17 +146,28 @@
         video.muted = true;
         video.loop = false; // ループしないように設定
 
+        // 最初の動画以外は非表示
+        if (index !== 0) {
+          video.style.display = "none"; // 初期状態で非表示にする
+        }
+
         // 動画が再生終了したら次の動画を再生
         video.addEventListener('ended', () => {
+          // 現在の動画を非表示
+          video.style.display = "none";
+
+          // 次の動画を表示
           currentVideo = (currentVideo + 1) % videoFiles.length; // 動画順にループ
+          container.children[currentVideo].style.display = "block"; // 次の動画を表示
           container.children[currentVideo].play(); // 次の動画を再生
         });
 
-        // `loadeddata` イベントで全動画が読み込まれたら同時に再生
+        // `loadeddata` イベントで全動画が読み込まれたら最初の動画を再生
         video.addEventListener('loadeddata', () => {
           loadedVideos++;
           if (loadedVideos === totalVideos) {
-            // 最初の動画を再生
+            // 最初の動画を表示し、再生
+            container.children[currentVideo].style.display = "block";
             container.children[currentVideo].play();
           }
         });
